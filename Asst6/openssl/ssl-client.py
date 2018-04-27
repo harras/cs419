@@ -12,7 +12,7 @@ while True:
 	# so here ca_certs must be the server certificate itself.
 	ssl_sock = ssl.wrap_socket(s,cert_reqs=ssl.CERT_REQUIRED,ca_certs='server.crt')
 
-	ssl_sock.connect(('127.0.0.1', 8082))
+	ssl_sock.connect(('127.0.0.1', 5005))
 
 	print(ssl_sock.getpeercert())
 

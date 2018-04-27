@@ -2,19 +2,11 @@ import socket
 import ssl
 import threading
 
-bind_ip= "127.0.0.1"
-bind_port = 5005
+KEYFILE = 'openssl/private.key'
+CERTFILE = 'openssl/server.crt'
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server.bind((bind_ip, bind_port))
-
-server.listen(5)
-
-print ("[*] Listening on %s:%d" % (bind_ip, bind_port))
 
 def handle_client(client_socket):
-
 	request = client_socket.recv(1024)
 	request_s = request.decode()
 	print ("[*] Recieved: %s" %request_s)
@@ -27,15 +19,19 @@ def handle_client(client_socket):
 	
 	client_socket.close()
 
-try:
+def server(address):
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.bind(address)
+	s.listen(5)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	ssl_sock = ssl.wrap_socket(s, keyfile=KEYFILE, certfile=CERTFILE, server_side=True)
+
+	print ("[*] Listening on {0}".format(address))
+
 	while True:
-
-		client,addr = server.accept()
-
+		client,addr = ssl_sock.accept()
 		print ("[*] Accepted connection from: %s:%d" %(addr[0], addr[1]))
-
 		client_handler = threading.Thread(target=handle_client,args=(client,))
 		client_handler.start()
-except:
-	server.close()
-	exit()
+
+server((socket.gethostbyname('localhost'), 5005))

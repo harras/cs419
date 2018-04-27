@@ -31,4 +31,4 @@ def echo_server(address):
 		except socket.error as e:
 			print('Error: {0}'.format(e))
 
-echo_server((socket.gethostbyname('localhost'), 8082))
+echo_server((socket.gethostbyname('localhost'), 5005))
