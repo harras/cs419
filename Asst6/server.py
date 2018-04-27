@@ -11,26 +11,31 @@ server.bind((bind_ip, bind_port))
 
 server.listen(5)
 
-print "[*] Listening on %s:%d" % (bind_ip, bind_port)
+print ("[*] Listening on %s:%d" % (bind_ip, bind_port))
 
 def handle_client(client_socket):
 
 	request = client_socket.recv(1024)
+	request_s = request.decode()
+	print ("[*] Recieved: %s" %request_s)
 	
-	print "[*] Recieved: %s" %request
-	
-	request = ''.join(reversed(request))
+	request_s = "".join(reversed(request_s))
+	request = str.encode(request_s)
 
 	# send back a packet
 	client_socket.send(request)
 	
 	client_socket.close()
 
-while True:
+try:
+	while True:
 
-	client,addr = server.accept()
+		client,addr = server.accept()
 
-	print "[*] Accepted connection from: %s:%d" %(addr[0], addr[1])
+		print ("[*] Accepted connection from: %s:%d" %(addr[0], addr[1]))
 
-	client_handler = threading.Thread(target=handle_client,args=(client,))
-	client_handler.start()
+		client_handler = threading.Thread(target=handle_client,args=(client,))
+		client_handler.start()
+except:
+	server.close()
+	exit()
