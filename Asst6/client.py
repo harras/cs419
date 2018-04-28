@@ -6,9 +6,33 @@ target_port = 5005
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+# I believe this line is where the client validates the server using its crt
 ssl_sock = ssl.wrap_socket(s,cert_reqs=ssl.CERT_REQUIRED,ca_certs='openssl/server.crt')
+print("Server certificate verified...")
+
 ssl_sock.connect((target_host, target_port))
-cert = ssl_sock.getpeercert()
+
+
+r = ssl_sock.recv(2048)
+s = r.decode()
+if s == "auth":
+	while True:	
+		username = str(input("Username: "))
+		password = str(input("Password: "))
+		auth = username +","+ password
+		auth_b = auth.encode()
+		ssl_sock.send(auth_b)
+
+		r = ssl_sock.recv(2048)
+		s = r.decode()
+		if s == "pass":
+			print("Logged in!")
+			break
+		elif s == "reg":
+			print("New user registered...")
+			break
+		else:
+			print("Wrong password, try again...")
 
 while True:
 	var = str(input(">"))
@@ -36,12 +60,11 @@ while True:
 		print("GET <group name>")
 		print("POST <group name> \"<string>\"")
 		print("END")
+		continue
 	else:
 		continue
 
 	response = ssl_sock.recv(4096)
 	print(response.decode())
-
-
 
 ssl_sock.close()
